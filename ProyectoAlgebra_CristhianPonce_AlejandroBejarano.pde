@@ -43,7 +43,7 @@ void setup() {
   
   size(1366, 768);
   
-  for (int i=0; i<11; i++) {
+  for (int i = 0; i < 9; i++) {
     
         xPNJs[i]=random(0, width);
         yPNJs[i]=random(0, height);
@@ -98,7 +98,7 @@ background(255);
   
 if (gameOver == false)
 {
-    for (int i=0; i<11; i++)
+    for (int i = 0; i < 9; i++)
     {
         if ((xPNJs[i] > 10.0) && (xPNJs[i] < width - 10.0) && (yPNJs[i] > 10.0) && (yPNJs[i] < height - 10.0))
         {
@@ -122,7 +122,7 @@ if (gameOver == false)
   ellipse(mouseX, mouseY, 20.0, 20.0);
 
   // Los PNJs
-  for (int i=0; i<11; i++)
+  for (int i = 0; i < 9; i++)
   {
     if (i == 0)
     {

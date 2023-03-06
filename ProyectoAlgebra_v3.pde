@@ -25,7 +25,6 @@ float AltoTeleport;
 PImage Namek;
 
 //MECANICA DEL JUEGO
-
 boolean firstHealth;
 boolean secondHealth;
 
@@ -44,6 +43,7 @@ boolean done = true;
 boolean nextToMe;
 boolean following = false;
 float distanciaPJ2;
+float distance;
 
 //POSICIONES DE LOS PNJS
 float[] xPNJ = new float[9];
@@ -202,264 +202,279 @@ void draw() {
 
   distanciaPJ2 = dist (mouseX, mouseY, xPNJ[0], yPNJ[0]); // distancia PJ1 a PJ2
   follows(distanciaPJ2);
-  
-  if (GameOver)
+  pause();
+  if (!gamePaused)
   {
-    background(0);
-
-    textSize(70);
-    fill(255, 0, 0);
-    text("GAME OVER! YOU LOSE!", 335.0, height / 2.0);
-  }
-
-  if (counter <= 0 && firstHealth == true && secondHealth == false)
-  {
-    GameOver = true;
-  }
-
-  if (counter <= 0 && firstHealth == true && secondHealth == true)
-  {
-    secondHealth = false;
-    counter = 15;
-  }
-
-  if (!GameOver)
-  {
-
-    for (int i = 0; i < 3; i++)
+    if (GameOver)
     {
-      fill(0, 0, 255);
+      background(0);
 
-      if (!NoItem1)
+      textSize(70);
+      fill(255, 0, 0);
+      text("GAME OVER! YOU LOSE!", 335.0, height / 2.0);
+    }
+
+    if (counter <= 0 && firstHealth == true && secondHealth == false)
+    {
+      GameOver = true;
+    }
+
+    if (counter <= 0 && firstHealth == true && secondHealth == true)
+    {
+      secondHealth = false;
+      counter = 15;
+    }
+
+    if (!GameOver)
+    {
+      // colisiones PJ2
+      for(int i = 1; i < 4; i++) // cada uno de los PNJ q persiguen a PJ2
       {
-        square(ItemX[0], ItemY[0], 30.0);
-      }
-
-      if (!NoItem2)
-      {
-        square(ItemX[1], ItemY[1], 30.0);
-      }
-
-      if (!NoItem3)
-      {
-        square(ItemX[2], ItemY[2], 30.0);
-      }
-
-      if (mouseX + radio > ItemX[i] && mouseY + radio > ItemY[i] && ItemX[i] + 30.0 > mouseX - radio && ItemY[i] + 30.0 > mouseY - radio)
-      {
-        collide = true;
-
-
-        if (collide == true && i == 0)
+        distance = dist (xPNJ[i], yPNJ[i], xPNJ[0], yPNJ[0]);
+        if(distance <= 100.0)
         {
-          for (int j = 5; j < 9; j++)
+          collide = true;
+        }
+      }
+
+      for (int i = 0; i < 3; i++)
+      {
+        fill(0, 0, 255);
+
+        if (!NoItem1)
+        {
+          square(ItemX[0], ItemY[0], 30.0);
+        }
+
+        if (!NoItem2)
+        {
+          square(ItemX[1], ItemY[1], 30.0);
+        }
+
+        if (!NoItem3)
+        {
+          square(ItemX[2], ItemY[2], 30.0);
+        }
+
+        if (mouseX + radio > ItemX[i] && mouseY + radio > ItemY[i] && ItemX[i] + 30.0 > mouseX - radio && ItemY[i] + 30.0 > mouseY - radio)
+        {
+          collide = true;
+
+
+          if (collide == true && i == 0 && !NoItem1)
           {
-            ALFA[j] = ALFA[j] * 2;
-            NoItem1 = true;
+            for (int j = 5; j < 9; j++)
+            {
+              ALFA[j] = ALFA[j] * 2;
+              NoItem1 = true;
+            }
+          }
+
+          if (collide == true && i == 1 && !NoItem2)
+          {
+            for (int k = 5; k < 9; k++)
+            {
+              ALFA[k] = ALFA[k] / 2;
+              NoItem2 = true;
+            }
+          }
+
+          if (collide == true && i == 2 && !NoItem3)
+          {
+            secondHealth = true;
+            NoItem3 = true;  
+          }
+        }
+      }
+
+      if (NoItem1 && NoItem2 && NoItem3)
+      {
+
+        fill(random(0, 255), random(0, 255), random(0, 255));
+        rect(TeleportX, TeleportY, LargoTeleport, AltoTeleport);
+
+        textSize(20);
+        fill(0, 255, 0);
+        text("A PORTAL!", TeleportX - 35.0, TeleportY - 20.0);
+
+        if (mouseX + radio > TeleportX && mouseY + radio > TeleportY && TeleportX + LargoTeleport > mouseX - radio && TeleportY + AltoTeleport > mouseY - radio)
+        {
+          FinalFight = true;
+        }
+      }
+
+      for (int i = 0; i < 8; i++)
+      {
+        image(LaRoca[i], TheRockX[i], TheRockY[i]);
+
+        if (mouseX + radio > TheRockX[i] && mouseY + radio > TheRockY[i] && TheRockX[i] + RockSizeX > mouseX - radio && TheRockY[i] + RockSizeY > mouseY - radio)
+        {
+          if (!secondHealth)
+          {
+            GameOver = true;
+          }
+
+          if (secondHealth)
+          {
+            secondHealth = false;
+          }
+        }
+      }
+
+      if (firstHealth)
+      {
+        image(Hearth, 20, 20);
+      }
+
+      if (secondHealth)
+      {
+        image(Hearth, 70, 20);
+      }
+
+
+      if (!FinalFight)
+      {
+        wait(espera);
+        if (tiempo_inicial >= espera)
+        {
+          for (int i = 0; i < 4; i++)
+          {
+            rposx[i] = random(10.0, width - 10.0);
+            rposy[i] = random(10.0, height - 10.0);
+          }
+          espera += 1000;
+        }
+
+        for (int i = 0; i < 9; i++)
+        {
+          if ( i == 0)
+          {
+            if (following)
+            {
+              xPNJ[i] = xPNJ[i] + 0.15 * (mouseX - xPNJ[i]);
+              yPNJ[i] = yPNJ[i] + 0.15 * (mouseY - yPNJ[i]);
+            } else
+            {
+              xPNJ[i] = xPNJ[i];
+              yPNJ[i] = yPNJ[i];
+            }
+          } else if ( i < 5 ) //Primeros 4 PNJs hacen wander
+          {
+            xPNJ[i] = xPNJ[i] + ALFA[i] * (rposx[d] - xPNJ[i]);
+            yPNJ[i] = yPNJ[i] + ALFA[i] * (rposy[d] - yPNJ[i]);
+          } else // La resta persigue al PJ2 y huyen de PJ1
+          {
+            xPNJ[i] = xPNJ[i] + ALFA[i] * (xPNJ[0] - xPNJ[i]);
+            yPNJ[i] = yPNJ[i] + ALFA[i] * (xPNJ[0] - yPNJ[i]);
+            xPNJ[i] = xPNJ[i] - ALFA[i] * (xPNJ[0] - xPNJ[i]);
+            yPNJ[i] = yPNJ[i] + ALFA[i] * (yPNJ[0] - yPNJ[i]);
+          }
+          d++;
+          if ( d == 4 )
+          {
+            d = 0;
           }
         }
 
-        if (collide == true && i == 1)
+
+        fill(0); // El PJ es verde
+        ellipse(mouseX, mouseY, 20.0, 20.0);
+
+        // Los PNJs
+        for (int i = 0; i < 9; i++)
         {
-          for (int k = 5; k < 9; k++)
+          if (i == 0)
           {
-            ALFA[k] = ALFA[k] / 2;
-            NoItem2 = true;
+            fill(0, 255, 0); // El PJ2 es verde
+            ellipse(xPNJ[i], yPNJ[i], 20.0, 20.0);
+          } else if (i > 0)
+          {
+            fill(255, 0, 0); // El PNJ es rojo
+            ellipse(xPNJ[i], yPNJ[i], 20.0, 20.0);
           }
         }
 
-        if (collide == true && i == 2)
-        {
-          secondHealth = true;
-          NoItem3 = true;
-        }
+        textSize(30);
+        fill(0);
+        text("REMAINING TIME: " + (int)counter, width - 275.0, 30.0);
+
+        wait(miliseconds);
       }
     }
 
-    if (NoItem1 && NoItem2 && NoItem3)
+    if (FinalFight)
     {
 
-      fill(random(0, 255), random(0, 255), random(0, 255));
-      rect(TeleportX, TeleportY, LargoTeleport, AltoTeleport);
+      background(Namek);
 
-      textSize(20);
-      fill(0, 255, 0);
-      text("A PORTAL!", TeleportX - 35.0, TeleportY - 20.0);
 
-      if (mouseX + radio > TeleportX && mouseY + radio > TeleportY && TeleportX + LargoTeleport > mouseX - radio && TeleportY + AltoTeleport > mouseY - radio)
+
+      if (!winFinalBoss)
       {
-        FinalFight = true;
-      }
-    }
 
-    for (int i = 0; i < 8; i++)
-    {
-      image(LaRoca[i], TheRockX[i], TheRockY[i]);
+        fill(0);
+        ellipse(mouseX, mouseY, 20.0, 20.0);
 
-      if (mouseX + radio > TheRockX[i] && mouseY + radio > TheRockY[i] && TheRockX[i] + RockSizeX > mouseX - radio && TheRockY[i] + RockSizeY > mouseY - radio)
-      {
-        if (!secondHealth)
+        image(Freezer, xBoss, yBoss);
+
+        xBoss = xBoss + bossSpeed *((mouseX - medidaXboss / 2.0) - xBoss);
+        yBoss = yBoss + bossSpeed *((mouseY - medidaXboss / 2.0) - yBoss);
+
+
+        textSize(30);
+        fill(0);
+        text("IT'S FRIEZA! SURVIVE, HE'S AT 100% STRENGHT!!", width / 2.0 - 325.0, 50.0);
+
+        if (mouseX + radio > xBoss && mouseY + radio > yBoss && xBoss + medidaXboss > mouseX - radio && yBoss + medidaYboss > mouseY - radio)
         {
           GameOver = true;
         }
 
-        if (secondHealth)
+        if (millis() > miliseconds + 1000)
         {
-          secondHealth = false;
-        }
-      }
-    }
+          miliseconds += 1000;
+          timeFinalFight--;
 
-    if (firstHealth)
-    {
-      image(Hearth, 20, 20);
-    }
-
-    if (secondHealth)
-    {
-      image(Hearth, 70, 20);
-    }
-
-
-    if (!FinalFight)
-    {
-      wait(espera);
-      if (tiempo_inicial >= espera)
-      {
-        for (int i = 0; i < 4; i++)
-        {
-          rposx[i] = random(10.0, width - 10.0);
-          rposy[i] = random(10.0, height - 10.0);
-        }
-        espera += 1000;
-      }
-
-      for (int i = 0; i < 9; i++)
-      {
-        if ( i == 0)
-        {
-          if (following)
+          if (timeFinalFight <= 0)
           {
-            xPNJ[i] = xPNJ[i] + 0.15 * (mouseX - xPNJ[i]);
-            yPNJ[i] = yPNJ[i] + 0.15 * (mouseY - yPNJ[i]);
-          } else
-          {
-            xPNJ[i] = xPNJ[i];
-            yPNJ[i] = yPNJ[i];
+            winFinalBoss = true;
           }
-        } else if ( i < 5 ) //Primeros 4 PNJs hacen wander
-        {
-          xPNJ[i] = xPNJ[i] + ALFA[i] * (rposx[d] - xPNJ[i]);
-          yPNJ[i] = yPNJ[i] + ALFA[i] * (rposy[d] - yPNJ[i]);
-        } else // La resta persigue al PJ2 y huyen de PJ1
-        {
-          xPNJ[i] = xPNJ[i] + ALFA[i] * (xPNJ[0] - xPNJ[i]);
-          yPNJ[i] = yPNJ[i] + ALFA[i] * (xPNJ[0] - yPNJ[i]);
-          xPNJ[i] = xPNJ[i] - ALFA[i] * (xPNJ[0] - xPNJ[i]);
-          yPNJ[i] = yPNJ[i] + ALFA[i] * (yPNJ[0] - yPNJ[i]);
-        }
-        d++;
-        if ( d == 4 )
-        {
-          d = 0;
         }
       }
 
-
-      fill(0); // El PJ es verde
-      ellipse(mouseX, mouseY, 20.0, 20.0);
-
-      // Los PNJs
-      for (int i = 0; i < 9; i++)
+      if (timeFinalFight <= 0)
       {
-        if (i == 0)
+        reposition(pos);
+        solverEuler();
+        for (int i = 0; i < size; i++)
         {
-          fill(0, 255, 0); // El PJ2 es verde
-          ellipse(xPNJ[i], yPNJ[i], 20.0, 20.0);
-        } else if (i > 0)
+          fill(random(100, 150), random(0, 20), random(0, 20));
+          ellipse(pos[i].x, pos[i].y, m[i] * 15.0, m[i] * 15.0);
+        }
+        fill(0);
+        ellipse(mouseX, mouseY, 20.0, 20.0);
+
+        textSize(30);
+        fill(255, 0, 0);
+        text("HE COULDN'T STORE ALL THAT WEIGHT...", width / 2.0 - 270.0, 300.0);
+        text("THANK YOU FOR SAVING US!", width / 2.0 - 200.0, 350.0);
+
+        millis();
+        finalSeconds += 1;
+
+        if (finalSeconds >= 300)
         {
-          fill(255, 0, 0); // El PNJ es rojo
-          ellipse(xPNJ[i], yPNJ[i], 20.0, 20.0);
+          background(0);
+
+          textSize(70);
+          fill(0, 255, 0);
+          text("GAME OVER! YOU WIN!", 335.0, height / 2.0);
         }
       }
-
-      textSize(30);
-      fill(0);
-      text("REMAINING TIME: " + (int)counter, width - 275.0, 30.0);
-
-      wait(miliseconds);
     }
-  }
-
-  if (FinalFight)
+  } else
   {
-
-    background(Namek);
-
-
-
-    if (!winFinalBoss)
-    {
-
-      fill(0);
-      ellipse(mouseX, mouseY, 20.0, 20.0);
-
-      image(Freezer, xBoss, yBoss);
-
-      xBoss = xBoss + bossSpeed *((mouseX - medidaXboss / 2.0) - xBoss);
-      yBoss = yBoss + bossSpeed *((mouseY - medidaXboss / 2.0) - yBoss);
-
-
-      textSize(30);
-      fill(0);
-      text("IT'S FRIEZA! SURVIVE, HE'S AT 100% STRENGHT!!", width / 2.0 - 325.0, 50.0);
-
-      if (mouseX + radio > xBoss && mouseY + radio > yBoss && xBoss + medidaXboss > mouseX - radio && yBoss + medidaYboss > mouseY - radio)
-      {
-        GameOver = true;
-      }
-
-      if (millis() > miliseconds + 1000)
-      {
-        miliseconds += 1000;
-        timeFinalFight--;
-
-        if (timeFinalFight <= 0)
-        {
-          winFinalBoss = true;
-        }
-      }
-    }
-
-    if (timeFinalFight <= 0)
-    {
-      reposition(pos);
-      solverEuler();
-      for (int i = 0; i < size; i++)
-      {
-        fill(random(100, 150), random(0, 20), random(0, 20));
-        ellipse(pos[i].x, pos[i].y, m[i] * 15.0, m[i] * 15.0);
-      }
-      fill(0);
-      ellipse(mouseX, mouseY, 20.0, 20.0);
-
-      textSize(30);
-      fill(255, 0, 0);
-      text("HE COULDN'T STORE ALL THAT WEIGHT...", width / 2.0 - 270.0, 300.0);
-      text("THANK YOU FOR SAVING US!", width / 2.0 - 200.0, 350.0);
-
-      millis();
-      finalSeconds += 1;
-
-      if (finalSeconds >= 300)
-      {
-        background(0);
-
-        textSize(70);
-        fill(0, 255, 0);
-        text("GAME OVER! YOU WIN!", 335.0, height / 2.0);
-      }
-    }
+    pause();
   }
 }
 
@@ -501,9 +516,6 @@ void wait (int t)
 }
 
 
-
-
-
 void reposition(PVector pos[])
 {
   if (done)
@@ -523,5 +535,19 @@ void follows (float distanciaPJ2)
   {
     println("Entré");
     following = true;
+  }
+}
+
+void pause()
+{
+  if (keyPressed && (key == CODED))
+  {
+    if (keyCode == ALT)
+    {
+      gamePaused = !gamePaused;
+      background(10);
+      fill(0, 255, 0);
+      text ("Pause", width / 2 - 30.0, height / 2);
+    }
   }
 }
